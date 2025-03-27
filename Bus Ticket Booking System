@@ -1,0 +1,162 @@
+import java.util.ArrayList;
+import java.util.Scanner;
+
+class Bus {
+    int busNumber;
+    int totalSeats;
+    int availableSeats;
+    String route;
+
+    Bus(int busNumber, int totalSeats, String route) {
+        this.busNumber = busNumber;
+        this.totalSeats = totalSeats;
+        this.availableSeats = totalSeats;
+        this.route = route;
+    }
+
+    void displayBusInfo() {
+        System.out.println("Bus No: " + busNumber + " | Route: " + route + " | Available Seats: " + availableSeats);
+    }
+}
+
+class Booking {
+    int busNumber;
+    String passengerName;
+    int numSeats;
+
+    Booking(int busNumber, String passengerName, int numSeats) {
+        this.busNumber = busNumber;
+        this.passengerName = passengerName;
+        this.numSeats = numSeats;
+    }
+}
+
+public class BusTicketBookingSystem {
+    static ArrayList<Bus> buses = new ArrayList<>();
+    static ArrayList<Booking> bookings = new ArrayList<>();
+    static Scanner sc = new Scanner(System.in);
+
+    public static void main(String[] args) {
+        // Initialize sample buses
+        buses.add(new Bus(101, 40, "City A to City B"));
+        buses.add(new Bus(102, 35, "City C to City D"));
+        buses.add(new Bus(103, 30, "City E to City F"));
+
+        while (true) {
+            System.out.println("\n--- BUS TICKET BOOKING SYSTEM ---");
+            System.out.println("1. View Available Buses");
+            System.out.println("2. Book Ticket");
+            System.out.println("3. Cancel Ticket");
+            System.out.println("4. View Booking Status");
+            System.out.println("5. Exit");
+            System.out.print("Enter your choice: ");
+            int choice = sc.nextInt();
+
+            switch (choice) {
+                case 1:
+                    viewAvailableBuses();
+                    break;
+                case 2:
+                    bookTicket();
+                    break;
+                case 3:
+                    cancelTicket();
+                    break;
+                case 4:
+                    viewBookingStatus();
+                    break;
+                case 5:
+                    System.out.println("Thank you for using the Bus Ticket Booking System.");
+                    System.exit(0);
+                default:
+                    System.out.println("Invalid choice! Please try again.");
+            }
+        }
+    }
+
+    // View available buses
+    static void viewAvailableBuses() {
+        System.out.println("\nAvailable Buses:");
+        for (Bus bus : buses) {
+            bus.displayBusInfo();
+        }
+    }
+
+    // Book ticket
+    static void bookTicket() {
+        System.out.print("\nEnter Bus Number: ");
+        int busNumber = sc.nextInt();
+        sc.nextLine(); // Consume newline
+        Bus bus = getBus(busNumber);
+        if (bus != null) {
+            System.out.print("Enter Passenger Name: ");
+            String passengerName = sc.nextLine();
+            System.out.print("Enter Number of Seats: ");
+            int numSeats = sc.nextInt();
+
+            if (numSeats <= bus.availableSeats) {
+                bus.availableSeats -= numSeats;
+                bookings.add(new Booking(busNumber, passengerName, numSeats));
+                System.out.println("Ticket booked successfully for " + passengerName);
+            } else {
+                // Print both messages in separate lines
+                System.out.println("Not enough seats available!");
+                System.out.println("Available Seats: " + bus.availableSeats);
+            }
+        } else {
+            System.out.println("Invalid Bus Number!");
+        }
+    }
+
+    // Cancel ticket
+    static void cancelTicket() {
+        System.out.print("\nEnter Bus Number: ");
+        int busNumber = sc.nextInt();
+        sc.nextLine(); // Consume newline
+        System.out.print("Enter Passenger Name: ");
+        String passengerName = sc.nextLine();
+
+        Booking bookingToRemove = null;
+        for (Booking booking : bookings) {
+            if (booking.busNumber == busNumber && booking.passengerName.equalsIgnoreCase(passengerName)) {
+                bookingToRemove = booking;
+                break;
+            }
+        }
+
+        if (bookingToRemove != null) {
+            bookings.remove(bookingToRemove);
+            Bus bus = getBus(busNumber);
+            if (bus != null) {
+                bus.availableSeats += bookingToRemove.numSeats;
+            }
+            System.out.println("Ticket canceled successfully for " + passengerName);
+        } else {
+            System.out.println("No booking found!");
+        }
+    }
+
+    // View booking status
+    static void viewBookingStatus() {
+        if (bookings.isEmpty()) {
+            System.out.println("\nNo bookings found.");
+            return;
+        }
+        System.out.println("\nCurrent Bookings:");
+        for (Booking booking : bookings) {
+            System.out.println("Bus No: " + booking.busNumber + 
+                               " | Passenger: " + booking.passengerName + 
+                               " | Seats: " + booking.numSeats);
+        }
+    }
+
+    // Get bus by bus number
+    static Bus getBus(int busNumber) {
+        for (Bus bus : buses) {
+            if (bus.busNumber == busNumber) {
+                return bus;
+            }
+        }
+        return null;
+    }
+}
